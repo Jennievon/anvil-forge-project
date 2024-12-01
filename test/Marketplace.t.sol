@@ -23,33 +23,65 @@ contract MarketplaceTest is Test {
 
     function testListItem() public {
         vm.prank(seller);
-        uint256 itemId = marketplace.listItem("Test Item", "Description", 100 ether);
+        uint256 itemId = marketplace.listItem(
+            "Test Item",
+            "Description",
+            100 ether
+        );
         assertEq(itemId, 1);
-        
-        (uint256 id, address itemSeller, string memory name, , uint256 price, bool active) = marketplace.getItem(itemId);
-        assertEq(id, 1);
-        assertEq(itemSeller, seller);
-        assertEq(name, "Test Item");
-        assertEq(price, 100 ether);
-        assertTrue(active);
+
+        Marketplace.Item memory item = marketplace.getItem(itemId);
+        assertEq(item.id, 1);
+        assertEq(item.seller, seller);
+        assertEq(item.name, "Test Item");
+        assertEq(item.price, 100 ether);
+        assertTrue(item.active);
     }
 
     function testBuyItem() public {
         // List item
         vm.prank(seller);
-        uint256 itemId = marketplace.listItem("Test Item", "Description", 100 ether);
+        uint256 itemId = marketplace.listItem(
+            "Test Item",
+            "Description",
+            100 ether
+        );
 
         // Approve and buy
         vm.prank(buyer);
         token.approve(address(marketplace), 100 ether);
-        
+
         vm.prank(buyer);
         marketplace.buyItem(itemId);
 
         assertEq(token.balanceOf(seller), 100 ether);
         assertEq(token.balanceOf(buyer), 900 ether);
-        
-        (, , , , , bool active) = marketplace.getItem(itemId);
-        assertFalse(active);
+
+        Marketplace.Item memory item = marketplace.getItem(itemId);
+        assertFalse(item.active);
+    }
+
+    function testGetActiveItems() public {
+        // List multiple items
+        vm.prank(seller);
+        marketplace.listItem("Item 1", "Description 1", 100 ether);
+
+        vm.prank(seller);
+        uint256 itemId2 = marketplace.listItem(
+            "Item 2",
+            "Description 2",
+            200 ether
+        );
+
+        // Buy one item
+        vm.prank(buyer);
+        token.approve(address(marketplace), 200 ether);
+
+        vm.prank(buyer);
+        marketplace.buyItem(itemId2);
+
+        Marketplace.Item[] memory activeItems = marketplace.getActiveItems();
+        assertEq(activeItems.length, 1);
+        assertEq(activeItems[0].name, "Item 1");
     }
 }
