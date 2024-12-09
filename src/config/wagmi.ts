@@ -1,14 +1,15 @@
-import { getDefaultConfig } from "connectkit";
 import { createConfig } from "wagmi";
 import { foundry } from "wagmi/chains";
-import { publicProvider } from "wagmi/providers/public";
+import { http } from "viem";
+import { getDefaultConfig } from "connectkit";
 
 export const config = createConfig(
   getDefaultConfig({
-    autoConnect: true,
     appName: "Marketplace dApp",
-    chains: [foundry],
     walletConnectProjectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || "",
-    providers: [publicProvider()],
+    chains: [foundry],
+    transports: {
+      [foundry.id]: http("http://127.0.0.1:8545"),
+    },
   })
 );
