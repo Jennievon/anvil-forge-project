@@ -1,4 +1,4 @@
-import { useContractWrite, useWaitForTransaction } from "wagmi";
+import { useWriteContract } from "wagmi";
 import { formatPrice, formatAddress } from "../lib/utils/format";
 import { useMarketplaceContract } from "../lib/hooks/useContract";
 import { MARKETPLACE_ABI } from "../config/abis";
@@ -9,15 +9,16 @@ import { Button } from "./ui/Button";
 export function ItemList() {
   const { items } = useMarketplaceContract();
 
-  const { data: buyData, write: buyItem } = useContractWrite({
-    address: MARKETPLACE_ADDRESS,
-    abi: MARKETPLACE_ABI,
-    functionName: "buyItem",
-  });
+  const { writeContract, isPending: isBuying } = useWriteContract();
 
-  const { isLoading: isBuying } = useWaitForTransaction({
-    hash: buyData?.hash,
-  });
+  const buyItem = async ({ args }: { args: [bigint] }) => {
+    writeContract({
+      abi: MARKETPLACE_ABI,
+      address: MARKETPLACE_ADDRESS,
+      functionName: "buyItem",
+      args,
+    });
+  };
 
   if (!items || items.length === 0) {
     return (
@@ -41,7 +42,7 @@ export function ItemList() {
               Price: {formatPrice(item.price)} tokens
             </p>
             <Button
-              onClick={() => buyItem({ args: [item.id] })}
+              onClick={() => buyItem({ args: [BigInt(item.id)] })}
               disabled={isBuying}
               className="w-full"
             >

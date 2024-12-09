@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useContractWrite, useWaitForTransaction } from "wagmi";
+import { useWriteContract } from "wagmi";
 import { parsePrice } from "../lib/utils/format";
 import { MARKETPLACE_ABI } from "../config/abis";
 import { MARKETPLACE_ADDRESS } from "../config/contracts";
@@ -11,23 +11,21 @@ export function ListItemForm() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
 
-  const { data: listData, write: listItem } = useContractWrite({
-    address: MARKETPLACE_ADDRESS,
-    abi: MARKETPLACE_ABI,
-    functionName: "listItem",
-  });
-
-  const { isLoading: isListing } = useWaitForTransaction({
-    hash: listData?.hash,
-  });
+  const { writeContract: listItem, isPending: isListing } = useWriteContract();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !description || !price) return;
 
     listItem({
+      abi: MARKETPLACE_ABI,
+      address: MARKETPLACE_ADDRESS,
+      functionName: "listItem",
       args: [name, description, parsePrice(price)],
     });
+    setName("");
+    setDescription("");
+    setPrice("");
   };
 
   return (

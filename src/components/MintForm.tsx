@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useContractWrite, useWaitForTransaction } from "wagmi";
+import { useWriteContract } from "wagmi";
 import { parsePrice } from "../lib/utils/format";
 import { TOKEN_ADDRESS } from "../config/contracts";
 import { Card } from "./ui/Card";
@@ -10,22 +10,22 @@ export function MintForm() {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
 
-  const { data: mintData, write: mint } = useContractWrite({
-    address: TOKEN_ADDRESS,
-    abi: TOKEN_ABI,
-    functionName: "mint",
-  });
-
-  const { isLoading: isMinting } = useWaitForTransaction({
-    hash: mintData?.hash,
-  });
+  const { writeContract: mint, isPending: isMinting } = useWriteContract();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!address || !amount) return;
 
+    if (!address.match(/^0x[0-9a-fA-F]{40}$/)) {
+      alert("Invalid address format");
+      return;
+    }
+
     mint({
-      args: [address, parsePrice(amount)],
+      abi: TOKEN_ABI,
+      address: TOKEN_ADDRESS,
+      functionName: "mint",
+      args: [address as `0x${string}`, parsePrice(amount)],
     });
   };
 
