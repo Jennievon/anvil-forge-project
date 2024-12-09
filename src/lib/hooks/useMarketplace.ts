@@ -1,33 +1,37 @@
-import { useContractRead, useContractWrite, useWaitForTransaction } from 'wagmi';
-import { parseEther, formatEther } from 'viem';
-import { MARKETPLACE_ABI } from '../constants/abi';
-import { MARKETPLACE_ADDRESS } from '../constants/addresses';
+import {
+  useContractRead,
+  useContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
+import { parseEther, formatEther } from "viem";
+import { MARKETPLACE_ABI } from "../../constants/abi";
+import { MARKETPLACE_ADDRESS } from "../../constants/addresses";
 
 export function useMarketplace() {
   const { data: activeItems, refetch: refetchItems } = useContractRead({
     address: MARKETPLACE_ADDRESS,
     abi: MARKETPLACE_ABI,
-    functionName: 'getActiveItems',
+    functionName: "getActiveItems",
   });
 
-  const { 
+  const {
     data: listItemData,
     write: listItem,
-    isLoading: isListing
+    isLoading: isListing,
   } = useContractWrite({
     address: MARKETPLACE_ADDRESS,
     abi: MARKETPLACE_ABI,
-    functionName: 'listItem',
+    functionName: "listItem",
   });
 
-  const { 
+  const {
     data: buyItemData,
     write: buyItem,
-    isLoading: isBuying
+    isLoading: isBuying,
   } = useContractWrite({
     address: MARKETPLACE_ADDRESS,
     abi: MARKETPLACE_ABI,
-    functionName: 'buyItem',
+    functionName: "buyItem",
   });
 
   const { isLoading: isWaitingForList } = useWaitForTransaction({
@@ -40,13 +44,17 @@ export function useMarketplace() {
     onSuccess: () => refetchItems(),
   });
 
-  const handleListItem = async (name: string, description: string, price: string) => {
+  const handleListItem = async (
+    name: string,
+    description: string,
+    price: string
+  ) => {
     try {
       await listItem({
         args: [name, description, parseEther(price)],
       });
     } catch (error) {
-      console.error('Error listing item:', error);
+      console.error("Error listing item:", error);
     }
   };
 
@@ -56,7 +64,7 @@ export function useMarketplace() {
         args: [itemId],
       });
     } catch (error) {
-      console.error('Error buying item:', error);
+      console.error("Error buying item:", error);
     }
   };
 

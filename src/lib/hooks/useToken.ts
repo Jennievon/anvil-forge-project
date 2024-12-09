@@ -1,45 +1,49 @@
-import { useContractRead, useContractWrite, useWaitForTransaction } from 'wagmi';
-import { parseEther } from 'viem';
-import { TOKEN_ABI } from '../constants/abi';
-import { TOKEN_ADDRESS, MARKETPLACE_ADDRESS } from '../constants/addresses';
+import {
+  useContractRead,
+  useContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
+import { parseEther } from "viem";
+import { TOKEN_ABI } from "../../constants/abi";
+import { TOKEN_ADDRESS, MARKETPLACE_ADDRESS } from "../../constants/addresses";
 
 export function useToken() {
   const { data: name } = useContractRead({
     address: TOKEN_ADDRESS,
     abi: TOKEN_ABI,
-    functionName: 'name',
+    functionName: "name",
   });
 
   const { data: symbol } = useContractRead({
     address: TOKEN_ADDRESS,
     abi: TOKEN_ABI,
-    functionName: 'symbol',
+    functionName: "symbol",
   });
 
   const { data: totalSupply } = useContractRead({
     address: TOKEN_ADDRESS,
     abi: TOKEN_ABI,
-    functionName: 'totalSupply',
+    functionName: "totalSupply",
   });
 
-  const { 
+  const {
     data: mintData,
     write: mint,
-    isLoading: isMinting
+    isLoading: isMinting,
   } = useContractWrite({
     address: TOKEN_ADDRESS,
     abi: TOKEN_ABI,
-    functionName: 'mint',
+    functionName: "mint",
   });
 
   const {
     data: approveData,
     write: approve,
-    isLoading: isApproving
+    isLoading: isApproving,
   } = useContractWrite({
     address: TOKEN_ADDRESS,
     abi: TOKEN_ABI,
-    functionName: 'approve',
+    functionName: "approve",
   });
 
   const { isLoading: isWaitingForMint } = useWaitForTransaction({
@@ -56,7 +60,7 @@ export function useToken() {
         args: [to, parseEther(amount)],
       });
     } catch (error) {
-      console.error('Error minting tokens:', error);
+      console.error("Error minting tokens:", error);
     }
   };
 
@@ -66,7 +70,7 @@ export function useToken() {
         args: [MARKETPLACE_ADDRESS, parseEther(amount)],
       });
     } catch (error) {
-      console.error('Error approving tokens:', error);
+      console.error("Error approving tokens:", error);
     }
   };
 
