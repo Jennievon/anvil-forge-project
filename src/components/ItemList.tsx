@@ -1,42 +1,54 @@
-import React from 'react';
-import { useMarketplace } from '../hooks/useMarketplace';
-import { useToken } from '../hooks/useToken';
-import { formatEther } from 'viem';
+import { useContractWrite, useWaitForTransaction } from "wagmi";
+import { formatPrice, formatAddress } from "../lib/utils/format";
+import { useMarketplaceContract } from "../lib/hooks/useContract";
+import { MARKETPLACE_ABI } from "../config/abis";
+import { MARKETPLACE_ADDRESS } from "../config/contracts";
+import { Card } from "./ui/Card";
+import { Button } from "./ui/Button";
 
 export function ItemList() {
-  const { activeItems, buyItem, isBuying } = useMarketplace();
-  const { approve, isApproving } = useToken();
+  const { items } = useMarketplaceContract();
 
-  const handleBuy = async (itemId: bigint, price: bigint) => {
-    await approve(formatEther(price));
-    await buyItem(itemId);
-  };
+  const { data: buyData, write: buyItem } = useContractWrite({
+    address: MARKETPLACE_ADDRESS,
+    abi: MARKETPLACE_ABI,
+    functionName: "buyItem",
+  });
 
-  if (!activeItems || activeItems.length === 0) {
+  const { isLoading: isBuying } = useWaitForTransaction({
+    hash: buyData?.hash,
+  });
+
+  if (!items || items.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <Card>
         <p className="text-gray-500 text-center">No items available</p>
-      </div>
+      </Card>
     );
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {activeItems.map((item) => (
-        <div key={item.id.toString()} className="bg-white p-6 rounded-lg shadow-md">
+      {items.map((item) => (
+        <Card key={item.id.toString()} className="flex flex-col">
           <h3 className="text-xl font-semibold mb-2">{item.name}</h3>
           <p className="text-gray-600 mb-4">{item.description}</p>
-          <p className="text-lg font-medium mb-4">
-            Price: {formatEther(item.price)} tokens
-          </p>
-          <button
-            onClick={() => handleBuy(item.id, item.price)}
-            disabled={isBuying || isApproving}
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {isBuying || isApproving ? 'Processing...' : 'Buy Now'}
-          </button>
-        </div>
+          <div className="mt-auto space-y-2">
+            <p className="text-sm text-gray-500">
+              Seller: {formatAddress(item.seller)}
+            </p>
+            <p className="text-lg font-medium">
+              Price: {formatPrice(item.price)} tokens
+            </p>
+            <Button
+              onClick={() => buyItem({ args: [item.id] })}
+              disabled={isBuying}
+              className="w-full"
+            >
+              {isBuying ? "Processing..." : "Buy Now"}
+            </Button>
+          </div>
+        </Card>
       ))}
     </div>
   );

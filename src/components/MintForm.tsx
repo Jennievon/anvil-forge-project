@@ -1,22 +1,42 @@
-import React, { useState } from 'react';
-import { useToken } from '../hooks/useToken';
+import { useState } from "react";
+import { useContractWrite, useWaitForTransaction } from "wagmi";
+import { parsePrice } from "../lib/utils/format";
+import { TOKEN_ADDRESS } from "../config/contracts";
+import { Card } from "./ui/Card";
+import { Button } from "./ui/Button";
+import { TOKEN_ABI } from "../config/abis";
 
 export function MintForm() {
-  const [address, setAddress] = useState('');
-  const [amount, setAmount] = useState('');
-  const { mint, isMinting } = useToken();
+  const [address, setAddress] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const { data: mintData, write: mint } = useContractWrite({
+    address: TOKEN_ADDRESS,
+    abi: TOKEN_ABI,
+    functionName: "mint",
+  });
+
+  const { isLoading: isMinting } = useWaitForTransaction({
+    hash: mintData?.hash,
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mint(address, amount);
+    if (!address || !amount) return;
+
+    mint({
+      args: [address, parsePrice(amount)],
+    });
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Mint Tokens</h2>
+    <Card title="Mint Tokens">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="address"
+            className="block text-sm font-medium text-gray-700"
+          >
             Recipient Address
           </label>
           <input
@@ -30,7 +50,10 @@ export function MintForm() {
           />
         </div>
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="amount"
+            className="block text-sm font-medium text-gray-700"
+          >
             Amount
           </label>
           <input
@@ -44,14 +67,10 @@ export function MintForm() {
             required
           />
         </div>
-        <button
-          type="submit"
-          disabled={isMinting}
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-        >
-          {isMinting ? 'Minting...' : 'Mint'}
-        </button>
+        <Button type="submit" disabled={isMinting}>
+          {isMinting ? "Minting..." : "Mint"}
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 }

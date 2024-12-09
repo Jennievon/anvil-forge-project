@@ -1,24 +1,43 @@
-import React, { useState } from 'react';
-import { useMarketplace } from '../hooks/useMarketplace';
-import { useToken } from '../hooks/useToken';
+import { useState } from "react";
+import { useContractWrite, useWaitForTransaction } from "wagmi";
+import { parsePrice } from "../lib/utils/format";
+import { MARKETPLACE_ABI } from "../config/abis";
+import { MARKETPLACE_ADDRESS } from "../config/contracts";
+import { Card } from "./ui/Card";
+import { Button } from "./ui/Button";
 
 export function ListItemForm() {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const { listItem, isListing } = useMarketplace();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+
+  const { data: listData, write: listItem } = useContractWrite({
+    address: MARKETPLACE_ADDRESS,
+    abi: MARKETPLACE_ABI,
+    functionName: "listItem",
+  });
+
+  const { isLoading: isListing } = useWaitForTransaction({
+    hash: listData?.hash,
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    listItem(name, description, price);
+    if (!name || !description || !price) return;
+
+    listItem({
+      args: [name, description, parsePrice(price)],
+    });
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">List New Item</h2>
+    <Card title="List New Item">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700"
+          >
             Item Name
           </label>
           <input
@@ -31,7 +50,10 @@ export function ListItemForm() {
           />
         </div>
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700"
+          >
             Description
           </label>
           <textarea
@@ -44,7 +66,10 @@ export function ListItemForm() {
           />
         </div>
         <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="price"
+            className="block text-sm font-medium text-gray-700"
+          >
             Price (in tokens)
           </label>
           <input
@@ -58,14 +83,10 @@ export function ListItemForm() {
             required
           />
         </div>
-        <button
-          type="submit"
-          disabled={isListing}
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-        >
-          {isListing ? 'Listing...' : 'List Item'}
-        </button>
+        <Button type="submit" disabled={isListing}>
+          {isListing ? "Listing..." : "List Item"}
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 }
