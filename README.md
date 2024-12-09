@@ -57,8 +57,8 @@ VITE_WALLETCONNECT_PROJECT_ID=your_project_id
 
 ## Contract Addresses (Local)
 
-- Token: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
-- Marketplace: `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0`
+- Token: [$DEPLOYED_TOKEN_ADDRESS]
+- Marketplace: [$DEPLOYED_MARKETPLACE_ADDRESS]
 
 ## Development Commands
 
@@ -78,10 +78,10 @@ npm run ponder:dev # Start Ponder in development mode
 ## Local Network Setup
 
 1. Add Local Network to MetaMask:
-   - Network Name: `Foundry`
+   - Network Name: `Anvil`
    - RPC URL: `http://127.0.0.1:8545`
    - Chain ID: `31337`
-   - Currency Symbol: `ETH`
+   - Currency Symbol: `GO`
 
 2. Import Anvil Test Account:
    - Copy private key from Anvil output (first account)
