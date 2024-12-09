@@ -11,7 +11,7 @@ export default createSchema((p) => ({
     id: p.string(),
     address: p.string(),
     balance: p.bigint(),
-    token: p.foreignKey("Token.id"),
+    token: p.string(),
   }),
   MarketplaceItem: p.createTable({
     id: p.string(),
@@ -20,7 +20,7 @@ export default createSchema((p) => ({
     description: p.string(),
     price: p.bigint(),
     active: p.boolean(),
-    createdAt: p.timestamp(),
-    updatedAt: p.timestamp(),
+    createdAt: p.string(),
+    updatedAt: p.string(),
   }),
 }));

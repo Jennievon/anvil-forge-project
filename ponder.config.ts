@@ -1,24 +1,27 @@
 import { createConfig } from "@ponder/core";
 import { http } from "viem";
 
+import { MARKETPLACE_ABI, TOKEN_ABI } from "./src/constants/abi";
+import { MARKETPLACE_ADDRESS, TOKEN_ADDRESS } from "./src/constants/addresses";
+
 export default createConfig({
   networks: {
-    foundry: {
+    anvil: {
       chainId: 31337,
       transport: http("http://127.0.0.1:8545"),
     },
   },
   contracts: {
     Token: {
-      network: "foundry",
-      abi: "./out/Token.sol/Token.json",
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      network: "anvil",
+      abi: TOKEN_ABI,
+      address: TOKEN_ADDRESS,
       startBlock: 0,
     },
     Marketplace: {
-      network: "foundry",
-      abi: "./out/Marketplace.sol/Marketplace.json",
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      network: "anvil",
+      abi: MARKETPLACE_ABI,
+      address: MARKETPLACE_ADDRESS,
       startBlock: 0,
     },
   },
